@@ -1,0 +1,169 @@
+class Flight:
+    def __init__(self):
+        self.flight_name = ""
+        self.start_location = ""
+        self.destination = ""
+        self.flight_no = 0
+        self.price = 0
+        self.total_tickets = 0
+        self.remaining_tickets = 0
+        self.passenger_id = ""
+        self.booked_tickets = 0
+        self.approved = False
+
+    def set_flight(self, name, start, dest, no, price, tickets):
+        self.flight_name = name
+        self.start_location = start
+        self.destination = dest
+        self.flight_no = no
+        self.price = price
+        self.total_tickets = tickets
+        self.remaining_tickets = tickets
+
+    def show(self):
+        print("Flight Name :", self.flight_name)
+        print("Start Location :", self.start_location)
+        print("Destination :", self.destination)
+        print("Flight No :", self.flight_no)
+        print("Price :", self.price)
+        print("Available Tickets :", self.remaining_tickets)
+        print("----------------------------")
+
+    def check(self, name):
+        return self.flight_name.lower() == name.lower()
+
+    def book(self, pid, tickets):
+        if tickets <= self.remaining_tickets:
+            self.passenger_id = pid
+            self.booked_tickets = tickets
+            self.approved = False
+            return True
+        return False
+
+    def approve(self):
+        self.remaining_tickets -= self.booked_tickets
+        self.approved = True
+
+    def issue(self):
+        if self.approved:
+            print("Ticket Issued")
+            print("Passenger ID :", self.passenger_id)
+            print("Tickets :", self.booked_tickets)
+        else:
+            print("Booking not approved")
+
+
+class Passenger:
+    def __init__(self):
+        self.username = ""
+        self.password = ""
+
+    def set_user(self, uname, pwd):
+        self.username = uname
+        self.password = pwd
+
+
+class FlightSystem:
+    def __init__(self):
+        self.flights = []
+        self.passengers = []
+
+    def run(self):
+        print("✈️ Flight Reservation System")
+
+        while True:
+            print("\n1.Passenger\n2.Cashier\n3.Exit")
+            ch = int(input("Enter choice : "))
+
+            if ch == 1:
+                self.passenger_menu()
+            elif ch == 2:
+                self.cashier_menu()
+            elif ch == 3:
+                print("Thank You")
+                break
+
+    def passenger_menu(self):
+        while True:
+            print("\n1.Sign In\n2.Check Availability & Price\n3.Book Ticket\n4.Exit")
+            ch = int(input("Enter choice : "))
+
+            if ch == 1:
+                uname = input("Enter username : ")
+                pwd = input("Enter password : ")
+                p = Passenger()
+                p.set_user(uname, pwd)
+                self.passengers.append(p)
+                print("Sign in successful")
+
+            elif ch == 2:
+                if len(self.flights) == 0:
+                    print("\nNo flights available.\n")
+                else:
+                    for i in self.flights:
+                        i.show()
+
+            elif ch == 3:
+                if len(self.flights) == 0:
+                    print("\nNo flights available to book.\n")
+                    continue
+
+                fname = input("Enter flight name : ")
+                pid = input("Enter passenger id : ")
+                tickets = int(input("How many tickets needed : "))
+
+                found = False
+                for i in self.flights:
+                    if i.check(fname):
+                        if i.book(pid, tickets):
+                            print("Booking successful, waiting for approval")
+                        else:
+                            print("Not enough tickets available")
+                        found = True
+                        break
+
+                if not found:
+                    print("Flight not found")
+
+            elif ch == 4:
+                break
+
+    def cashier_menu(self):
+        while True:
+            print("\n1.Add Flight\n2.Approve Booking\n3.Issue Ticket\n4.Exit")
+            ch = int(input("Enter choice : "))
+
+            if ch == 1:
+                name = input("Enter flight name : ")
+                start = input("Enter start location : ")
+                dest = input("Enter destination : ")
+                no = int(input("Enter flight number : "))
+                price = int(input("Enter price : "))
+                tickets = int(input("Enter total tickets : "))
+
+                i = Flight()
+                i.set_flight(name, start, dest, no, price, tickets)
+                self.flights.append(i)
+                print("Flight added successfully")
+
+            elif ch == 2:
+                fname = input("Enter flight name : ")
+                for i in self.flights:
+                    if i.check(fname) and not i.approved:
+                        i.approve()
+                        print("Booking approved")
+                        break
+
+            elif ch == 3:
+                fname = input("Enter flight name : ")
+                for i in self.flights:
+                    if i.check(fname):
+                        i.issue()
+                        break
+
+            elif ch == 4:
+                break
+
+
+fs = FlightSystem()
+fs.run()
